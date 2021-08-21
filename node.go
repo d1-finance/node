@@ -66,7 +66,7 @@ func (t *TCPNode) Run() (err error) {
 	t.Starttime = time.Now()
 
 	t.log("node listen on " + t.addr)
-	t.server, err = net. Listen("tcp", t.addr)
+	t.server, err = net.Listen("tcp", t.addr)
 	if err != nil {
 		//return errors.Wrapf(err, "Unable to listen on port %s\n", t.addr)
 	}
@@ -212,7 +212,7 @@ func (t *TCPNode) handleConnection(mgr *chain.ChainManager, peer netio.Peer) {
 	//netio.NetConnectorSetup(ntchan)
 	netio.NetConnectorSetup(peer.NTchan)
 
-	go RequestHandlerTel(t, peer)
+	// go RequestHandlerTel(t, peer)
 
 	//go netio.WriteLoop(ntchan, 100*time.Millisecond)
 
@@ -420,4 +420,11 @@ func runNodeWithConfig() {
 
 	//handle shutdown should never happen, need restart on OS level and error handling
 
+}
+
+func main() {
+	GitCommit := os.Getenv("GIT_COMMIT")
+	fmt.Printf("--- run polygon ---\ngit commit: %s ----\n", GitCommit)
+
+	runNodeWithConfig()
 }
