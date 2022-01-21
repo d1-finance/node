@@ -1,13 +1,8 @@
 package main
 
-import (
-	"fmt"
-	"os"
-)
+func mains() {
+	// GitCommit := os.Getenv("GIT_COMMIT")
+	// fmt.Printf("--- run polygon ---\ngit commit: %s ----\n", GitCommit)
 
-func main() {
-	GitCommit := os.Getenv("GIT_COMMIT")
-	fmt.Printf("--- run polygon ---\ngit commit: %s ----\n", GitCommit)
-
-	runNodeWithConfig()
+	// runNodeWithConfig()
 }

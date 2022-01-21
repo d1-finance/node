@@ -1,6 +1,6 @@
-# StackLedger
+# horizon
 
-Stackledger is a new blockchain. It is written in golang and uses a novel networking stack built from two primitives: channels and extensible data notation.
+Horizon is a new blockchain. It is written in golang and uses a novel networking stack built from two primitives: channels and extensible data notation.
 On this lower layer an economic system is built - the proof-of-asset algorithm. The lower layer is created such that in principle any sensible economic incentive and consensus algorithm
 can be plugged in and more generically a distributed system can be built. Polygon allows for arbitrary message encoding and signing, using new primitives for communication between nodes. This makes it more general as a transaction and communcation platform. See [whitepaper for details](https://github.com/stackledger/docs/blob/master/whitepaper.md)
 
@@ -9,7 +9,8 @@ can be plugged in and more generically a distributed system can be built. Polygo
 install golang and git
 
 run node:
-```./run.sh```
+```go install horizon.go
+horizon```
 
 see [install docs](https://github.com/stackledger/docs/blob/master/install.md)
 see also [telnet](https://github.com/stackledger/docs/blob/master/telnet.md)
@@ -37,9 +38,7 @@ create keys
 
 ## contributions
 
-contributions, such as pull requests, bug reports and comments are very welcome
+contributions, such as pull requests, bug reports and comments are welcome
 
-Telegram:
-https://t.me/joinchat/Dzif7R1cHnAzulflui53fA
 
 License: MIT license

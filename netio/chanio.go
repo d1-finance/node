@@ -101,6 +101,8 @@ func ConnNtchanStub(name string) Ntchan {
 //all major processes to operate
 func NetConnectorSetup(ntchan Ntchan) {
 
+	vlog(ntchan, "NetConnectorSetup "+ntchan.SrcName+" "+ntchan.DestName)
+
 	// read_loop_time := 800 * time.Millisecond
 	// read_time_chan := 300 * time.Millisecond
 	// write_loop_time := 300 * time.Millisecond
@@ -152,7 +154,7 @@ func ProcessorEchoMock(ntchan Ntchan) {
 }
 
 //read from reader queue and process by forwarding to right channel
-func ReadProcessor(ntchan Ntchan) {
+func ReadProcessorJson(ntchan Ntchan) {
 
 	for {
 		logmsgd(ntchan, "ReadProcessor", "loop")
@@ -194,6 +196,25 @@ func ReadProcessor(ntchan Ntchan) {
 
 			//ntchan.Reader_processed++
 			//log.Println(" ", ntchan.Reader_processed, ntchan)
+		}
+	}
+
+}
+
+//read from reader queue and echo all messages back
+func ReadProcessor(ntchan Ntchan) {
+
+	for {
+		logmsgd(ntchan, "ReadProcessor", "loop")
+		msgString := <-ntchan.Reader_queue
+		logmsgd(ntchan, "ReadProcessor", msgString)
+
+		if len(msgString) > 0 {
+			logmsgc(ntchan, ntchan.SrcName, "ReadProcessor", msgString) //, ntchan.Reader_processed)
+
+			reply := "echo >>> " + msgString
+			ntchan.Reader_queue <- reply
+
 		}
 	}
 

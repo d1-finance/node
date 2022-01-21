@@ -62,10 +62,10 @@ func (t *TCPNode) log(s string) {
 }
 
 // start listening on tcp and handle connection through channels
-func (t *TCPNode) Run() (err error) {
+func (t *TCPNode) RunTCP() (err error) {
 	t.Starttime = time.Now()
 
-	t.log("node listen on " + t.addr)
+	t.log("node listens on " + t.addr)
 	t.server, err = net.Listen("tcp", t.addr)
 	if err != nil {
 		//return errors.Wrapf(err, "Unable to listen on port %s\n", t.addr)
@@ -115,6 +115,7 @@ func (t *TCPNode) HandleConnectTCP() {
 		t.log(fmt.Sprintf("new peer %v ", newpeerConn))
 		// log.Println("> ", t.Peers)
 		// log.Println("# peers ", len(t.Peers))
+		t.log(fmt.Sprintf("setup channels"))
 		Verbose := true
 		ntchan := netio.ConnNtchan(newpeerConn, "server", strRemoteAddr, Verbose)
 
@@ -135,6 +136,7 @@ func (t *TCPNode) HandleConnectTCP() {
 //init an output connection
 //TODO check if connected inbound already
 func initOutbound(mainPeerAddress string, node_port int, verbose bool) netio.Ntchan {
+	fmt.Println("initOutbound")
 
 	addr := mainPeerAddress + ":" + strconv.Itoa(node_port)
 	//log.Println("dial ", addr)
@@ -207,7 +209,7 @@ func FetchAllBlocks(config config.Configuration, t *TCPNode) {
 func (t *TCPNode) handleConnection(mgr *chain.ChainManager, peer netio.Peer) {
 	//tr := 100 * time.Millisecond
 	//defer ntchan.Conn.Close()
-	//t.log(fmt.Sprintf("handleConnection"))
+	t.log(fmt.Sprintf("handleConnection"))
 
 	//netio.NetConnectorSetup(ntchan)
 	netio.NetConnectorSetup(peer.NTchan)
@@ -287,7 +289,7 @@ func runNode(t *TCPNode) {
 
 	go t.HandleConnectTCP()
 
-	t.Run()
+	t.RunTCP()
 }
 
 //init sync or load of blocks
@@ -424,7 +426,7 @@ func runNodeWithConfig() {
 
 func main() {
 	GitCommit := os.Getenv("GIT_COMMIT")
-	fmt.Printf("--- run polygon ---\ngit commit: %s ----\n", GitCommit)
+	fmt.Printf("--- run horizon ---\ngit commit: %s ----\n", GitCommit)
 
 	runNodeWithConfig()
 }
