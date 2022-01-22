@@ -121,6 +121,27 @@ func NetConnectorSetup(ntchan Ntchan) {
 	//go WriteProducer(ntchan)
 }
 
+//echo pipeline
+//TODO separate namespace
+func NetConnectorSetupEcho(ntchan Ntchan) {
+
+	vlog(ntchan, "NetConnectorSetup "+ntchan.SrcName+" "+ntchan.DestName)
+
+	// read_loop_time := 800 * time.Millisecond
+	// read_time_chan := 300 * time.Millisecond
+	// write_loop_time := 300 * time.Millisecond
+
+	//reads from the actual "physical" network
+	go ReadLoop(ntchan)
+	//process of reads
+	go ReadProcessorEcho(ntchan)
+	//write to network whatever is in writer queue
+	go WriteLoop(ntchan, 300*time.Millisecond)
+
+	//TODO
+	//go WriteProducer(ntchan)
+}
+
 func ReadLoop(ntchan Ntchan) {
 	vlog(ntchan, "init ReadLoop "+ntchan.SrcName+" "+ntchan.DestName)
 	d := 300 * time.Millisecond
@@ -212,8 +233,27 @@ func ReadProcessor(ntchan Ntchan) {
 		if len(msgString) > 0 {
 			logmsgc(ntchan, ntchan.SrcName, "ReadProcessor", msgString) //, ntchan.Reader_processed)
 
-			reply := "echo >>> " + msgString
-			ntchan.Reader_queue <- reply
+			// reply := "echo >>> " + msgString
+			// ntchan.Reader_queue <- reply
+
+		}
+	}
+
+}
+
+//read from reader queue and echo all messages back
+func ReadProcessorEcho(ntchan Ntchan) {
+
+	for {
+		logmsgd(ntchan, "ReadProcessor", "loop")
+		msgString := <-ntchan.Reader_queue
+		logmsgd(ntchan, "ReadProcessor", msgString)
+
+		if len(msgString) > 0 {
+			logmsgc(ntchan, ntchan.SrcName, "ReadProcessor", msgString) //, ntchan.Reader_processed)
+
+			reply := "echo: " + msgString
+			ntchan.Writer_queue <- reply
 
 		}
 	}
@@ -262,7 +302,7 @@ func WriteLoop(ntchan Ntchan, d time.Duration) {
 }
 
 //simple echo net
-func NetConnectorSetupEcho(ntchan Ntchan) {
+func MockNetConnectorSetupEcho(ntchan Ntchan) {
 
 	//read loop
 	go func() {

@@ -30,7 +30,7 @@ func (t *TCPNode) handleConnectionMock(mgr *chain.ChainManager, ntchan netio.Ntc
 	//t.log(fmt.Sprintf("handleConnection"))
 
 	//netio.NetConnectorSetup(ntchan)
-	netio.NetConnectorSetupEcho(ntchan)
+	netio.MockNetConnectorSetupEcho(ntchan)
 
 	go RequestHandlerTelMock(t, ntchan)
 

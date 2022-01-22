@@ -212,7 +212,8 @@ func (t *TCPNode) handleConnection(mgr *chain.ChainManager, peer netio.Peer) {
 	t.log(fmt.Sprintf("handleConnection"))
 
 	//netio.NetConnectorSetup(ntchan)
-	netio.NetConnectorSetup(peer.NTchan)
+	//netio.NetConnectorSetup(peer.NTchan)
+	netio.NetConnectorSetupEcho(peer.NTchan)
 
 	// go RequestHandlerTel(t, peer)
 
