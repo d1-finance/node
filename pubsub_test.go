@@ -26,7 +26,7 @@ func initserverpub() *TCPNode {
 		//log.Println("start ", testsrv)
 	}
 
-	go testsrv.Run()
+	go testsrv.RunTCP()
 	go testsrv.HandleConnectTCP()
 
 	return testsrv

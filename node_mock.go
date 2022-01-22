@@ -97,7 +97,7 @@ func runNodeMock(t *TCPNode) {
 
 	go t.HandleConnectTCP()
 
-	t.Run()
+	t.RunTCP()
 }
 
 func runAllMock(config config.Configuration) {
