@@ -35,12 +35,14 @@ const (
 
 //TODO define "namespace/grammar/protocol file"
 const (
+	CMD_REGISTERPEER   = "REGISTERPEER"
+	CMD_GETPEERS       = "GETPEERS"
+	CMD_TIME           = "TIME"
 	CMD_ACCOUNTS       = "ACCOUNTS"
 	CMD_BALANCE        = "BALANCE" //get balance of account
 	CMD_BLOCKHEIGHT    = "BLOCKHEIGHT"
 	CMD_FAUCET         = "FAUCET"
 	CMD_GETTXPOOL      = "GETTXPOOL"
-	CMD_GETPEERS       = "GETPEERS"
 	CMD_GETBLOCKS      = "GETBLOCKS"
 	CMD_HEARTBEAT      = "HEARTBEAT"
 	EMPTY_DATA         = "EMPTY"
@@ -66,12 +68,13 @@ const (
 )
 
 var CMDS = []string{
+	CMD_GETPEERS,
+	CMD_REGISTERPEER,
 	CMD_PING,
 	CMD_PONG,
 	CMD_NUMACCOUNTS,
 	CMD_ACCOUNTS,
 	CMD_BALANCE,
-	CMD_GETPEERS,
 	CMD_BLOCKHEIGHT,
 	CMD_FAUCET,
 	CMD_GETTXPOOL,

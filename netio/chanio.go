@@ -14,6 +14,7 @@ package netio
 // inflow }
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net"
@@ -161,11 +162,52 @@ func NetConnectorSetupEcho(ntchan Ntchan) {
 	//go WriteProducer(ntchan)
 }
 
+func RequestReply(ntchan Ntchan, msgString string) string {
+
+	//TODO separate namespace
+
+	var reply_msg string
+	//var reply_msg netio.Message
+	msg := ParseLine(msgString)
+
+	fmt.Sprintf("Handle cmd %v", msg.Command)
+
+	switch msg.Command {
+
+	case CMD_PING:
+		reply_msg := "pong"
+		return reply_msg
+		//reply := HandlePing(msg)
+		//msg := netio.Message{MessageType: netio.REP, Command: netio.CMD_BALANCE, Data: []byte(balJson)}
+		//reply_msg = netio.ToJSONMessage(reply)
+
+	case CMD_TIME:
+		dt := time.Now()
+		reply_msg := dt.String()
+		return reply_msg
+
+	case CMD_REGISTERPEER:
+		reply_msg := "todo"
+		return reply_msg
+
+	default:
+		errormsg := "Error: not found command"
+		fmt.Println(errormsg)
+		xjson, _ := json.Marshal("")
+		msg := Message{MessageType: REP, Command: CMD_ERROR, Data: []byte(xjson)}
+		reply_msg = ToJSONMessage(msg)
+	}
+
+	return reply_msg
+}
+
 func RequestLoop(ntchan Ntchan) {
 	for {
 		msg := <-ntchan.REQ_in
 		//fmt.Println("request %s", msg)
 		vlog(ntchan, "request "+msg)
+		reply := RequestReply(ntchan, msg)
+		ntchan.REP_out <- reply
 	}
 }
 
