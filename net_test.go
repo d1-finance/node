@@ -11,7 +11,7 @@ import (
 	"github.com/polygonledger/node/xutils"
 )
 
-const test_node_port = 8888
+const test_node_port = 8080
 
 func initserver() *TCPNode {
 	//log.Println("initserver")

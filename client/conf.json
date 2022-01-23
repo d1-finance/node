@@ -2,7 +2,7 @@
     
     "PeerAddresses": ["localhost", "polygonnode.com", "polygon.cc"],
     
-    "Nodeport": 8888,
+    "Nodeport": 8080,
 
     "Webport": 8080,
 

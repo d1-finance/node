@@ -1,0 +1,11 @@
+
+sudo apt-get update -y
+sudo apt-get -y upgrade -y
+
+curl -OL https://golang.org/dl/go1.16.7.linux-amd64.tar.gz
+
+https://www.digitalocean.com/community/tutorials/how-to-install-go-on-ubuntu-20-04
+
+
+sudo apt search golang-go
+sudo apt-get install golang

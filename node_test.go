@@ -18,7 +18,7 @@ func TestBasicCommand(t *testing.T) {
 	mgr.InitAccounts()
 	node, _ := NewNode()
 	//defer node.Close()
-	node.addr = ":" + strconv.Itoa(8888)
+	node.addr = ":" + strconv.Itoa(8080)
 	node.Loglevel = LOGLEVEL_OFF
 	node.Mgr = &mgr
 
@@ -55,7 +55,7 @@ func TestAccountmsg(t *testing.T) {
 
 	node, _ := NewNode()
 	//defer node.Close()
-	node.addr = ":" + strconv.Itoa(8888)
+	node.addr = ":" + strconv.Itoa(8080)
 	node.Loglevel = LOGLEVEL_OFF
 	mgr := chain.CreateManager()
 	mgr.InitAccounts()
@@ -82,7 +82,7 @@ func TestBalance(t *testing.T) {
 
 	node, _ := NewNode()
 	//defer node.Close()
-	node.addr = ":" + strconv.Itoa(8888)
+	node.addr = ":" + strconv.Itoa(8080)
 	node.Loglevel = LOGLEVEL_OFF
 	mgr := chain.CreateManager()
 	mgr.InitAccounts()
@@ -162,7 +162,7 @@ func TestFaucetTx(t *testing.T) {
 
 	// node, _ := NewNode()
 	// //defer node.Close()
-	// node.addr = ":" + strconv.Itoa(8888)
+	// node.addr = ":" + strconv.Itoa(8080)
 	// node.Loglevel = LOGLEVEL_OFF
 	// mgr := chain.CreateManager()
 	// mgr.InitAccounts()
@@ -201,7 +201,7 @@ func TestFaucetTx(t *testing.T) {
 
 // 	node, _ := NewNode()
 // 	//defer node.Close()
-// 	node.addr = ":" + strconv.Itoa(8888)
+// 	node.addr = ":" + strconv.Itoa(8080)
 // 	mgr := chain.CreateManager()
 // 	mgr.InitAccounts()
 // 	node.Mgr = &mgr

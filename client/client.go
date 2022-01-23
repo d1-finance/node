@@ -24,7 +24,7 @@ import (
 
 var Peers []ntcl.Peer
 
-const node_port = 8888
+const node_port = 8080
 
 const keysfile = "keys.wfe"
 

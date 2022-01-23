@@ -136,7 +136,7 @@ func sendnode(w http.ResponseWriter, r *http.Request) {
 }
 
 func initClient(mainPeerAddress string, verbose bool) ntcl.Ntchan {
-	const node_port = 8888
+	const node_port = 8080
 	addr := mainPeerAddress + ":" + strconv.Itoa(node_port)
 	log.Println("dial ", addr)
 	conn, err := net.Dial("tcp", addr)
@@ -196,7 +196,7 @@ func main() {
 	peerAddress := "localhost"
 	ntchan := initClient(peerAddress, true)
 
-	const node_port = 8888
+	const node_port = 8080
 	connect_peer = ntcl.CreatePeer(peerAddress, peerAddress, node_port, ntchan)
 
 	ping(connect_peer)
