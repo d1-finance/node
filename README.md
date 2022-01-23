@@ -2,15 +2,15 @@
 
 Horizon is a new blockchain. It is written in golang and uses a novel networking stack built from two primitives: channels and extensible data notation.
 On this lower layer an economic system is built - the proof-of-asset algorithm. The lower layer is created such that in principle any sensible economic incentive and consensus algorithm
-can be plugged in and more generically a distributed system can be built. Polygon allows for arbitrary message encoding and signing, using new primitives for communication between nodes. This makes it more general as a transaction and communcation platform. See [whitepaper for details](https://github.com/stackledger/docs/blob/master/whitepaper.md)
+can be plugged in and more generically a distributed system can be built. Horizon allows for arbitrary message encoding and signing, using new primitives for communication between nodes. This makes it more general as a transaction and communcation platform. 
 
 ## runing a node
 
 install golang and git
 
 run node:
-```go install horizon.go
-horizon```
+```go build -o bin/horizon
+./bin/horizon```
 
 see [install docs](https://github.com/stackledger/docs/blob/master/install.md)
 see also [telnet](https://github.com/stackledger/docs/blob/master/telnet.md)

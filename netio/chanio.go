@@ -25,11 +25,14 @@ type Ntchan struct {
 	Writer_queue chan string
 	//inflow
 	REQ_in  chan string
-	REP_out chan string
-	//outflow
-	REQ_out chan string
 	REP_in  chan string
-
+	SEND_in chan string
+	//outflow
+	REP_out  chan string
+	REQ_out  chan string
+	SEND_out chan string
+	//
+	//
 	PUB_out chan string
 	SUB_out chan string
 	//PUB_time_quit chan int
