@@ -3,6 +3,7 @@ package netio
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 )
 
 //messages. currently uses json and some hacks to make it somewhat flexible mechanism
@@ -138,5 +139,34 @@ func FromJSON(msg_string string) Message {
 	var msgu Message
 	err := json.Unmarshal([]byte(msg_string), &msgu)
 	fmt.Println("error decoding json ", err)
+	return msgu
+}
+
+type StrSlice []string
+
+func (list StrSlice) Has(a string) bool {
+	for _, b := range list {
+		if b == a {
+			return true
+		}
+	}
+	return false
+}
+
+func ParseLine(msg_string string) Message {
+	var msgu Message
+	msg_array := strings.Split(msg_string, " ")
+	//fmt.Println("error decoding line ", err)
+	fmt.Println(msg_array)
+	var msgTypes = StrSlice{"REQ"}
+
+	if len(msg_array) >= 2 {
+		if !msgTypes.Has(msg_array[0]) {
+			fmt.Println("unsupported msg type")
+		}
+
+		msgu.MessageType = msg_array[0]
+		msgu.Command = msg_array[1]
+	}
 	return msgu
 }

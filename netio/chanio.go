@@ -5,7 +5,13 @@ package netio
 // netio -> semantics of channels
 // TCP/IP -> golang net
 
+// TODO
+// create a channel wrapper struct
+// which has a flag if its in or out flow
 // see whitepaper for details
+// type Nchain {
+// c chan string
+// inflow }
 
 import (
 	"fmt"
@@ -24,13 +30,15 @@ type Ntchan struct {
 	Reader_queue chan string
 	Writer_queue chan string
 	//inflow
-	REQ_in  chan string
-	REP_in  chan string
-	SEND_in chan string
+	REQ_in   chan string
+	REP_in   chan string
+	SEND_in  chan string
+	HEART_in chan string
 	//outflow
-	REP_out  chan string
-	REQ_out  chan string
-	SEND_out chan string
+	REP_out   chan string
+	REQ_out   chan string
+	SEND_out  chan string
+	HEART_out chan string
 	//
 	//
 	PUB_out chan string
@@ -72,6 +80,10 @@ func ConnNtchan(conn net.Conn, SrcName string, DestName string, verbose bool) Nt
 	ntchan.REQ_in = make(chan string)
 	ntchan.REP_in = make(chan string)
 	ntchan.REP_out = make(chan string)
+
+	ntchan.HEART_in = make(chan string)
+	ntchan.HEART_out = make(chan string)
+
 	ntchan.REQ_out = make(chan string)
 	ntchan.PUB_out = make(chan string)
 	//ntchan.PUB_time_quit = make(chan int)
@@ -120,6 +132,10 @@ func NetConnectorSetup(ntchan Ntchan) {
 
 	go WriteLoop(ntchan, 300*time.Millisecond)
 
+	//go HeartbeatPub(ntchan)
+
+	go RequestLoop(ntchan)
+
 	//TODO
 	//go WriteProducer(ntchan)
 }
@@ -143,6 +159,14 @@ func NetConnectorSetupEcho(ntchan Ntchan) {
 
 	//TODO
 	//go WriteProducer(ntchan)
+}
+
+func RequestLoop(ntchan Ntchan) {
+	for {
+		msg := <-ntchan.REQ_in
+		//fmt.Println("request %s", msg)
+		vlog(ntchan, "request "+msg)
+	}
 }
 
 func ReadLoop(ntchan Ntchan) {
@@ -236,6 +260,18 @@ func ReadProcessor(ntchan Ntchan) {
 		if len(msgString) > 0 {
 			logmsgc(ntchan, ntchan.SrcName, "ReadProcessor", msgString) //, ntchan.Reader_processed)
 
+			//msg := FromJSON(msgString)
+			msg := ParseLine(msgString)
+			logmsgc(ntchan, ntchan.SrcName, "ReadProcessor Msg", msg.MessageType)
+
+			switch msg.MessageType {
+			case "REQ":
+				ntchan.REQ_in <- msgString
+
+			case "REP":
+				ntchan.REP_in <- msgString
+			}
+
 			// reply := "echo >>> " + msgString
 			// ntchan.Reader_queue <- reply
 
@@ -265,9 +301,13 @@ func ReadProcessorEcho(ntchan Ntchan) {
 
 //process from higher level chans into write queue
 func WriteProcessor(ntchan Ntchan) {
+	//TODO have a list and iterate over it
 	for {
 
 		select {
+		case msg := <-ntchan.HEART_out:
+			ntchan.Writer_queue <- msg
+
 		case msg := <-ntchan.REP_out:
 			//read from REQ_out
 			//log.Println("[Writeprocessor]  REP_out", msg)
@@ -333,4 +373,13 @@ func MockNetConnectorSetupEcho(ntchan Ntchan) {
 			NetWrite(ntchan, msgString)
 		}
 	}()
+}
+
+func HeartbeatPub(ntchan Ntchan) {
+	fmt.Print("HeartbeatPub")
+	for range time.Tick(time.Second * 1) {
+		msg := "heartbeat"
+		vlog(ntchan, "put on Writer_queue "+msg)
+		ntchan.Writer_queue <- msg
+	}
 }
