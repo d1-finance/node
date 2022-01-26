@@ -162,7 +162,7 @@ func ParseLine(msg_string string) (Message, error) {
 	msg_array := strings.Split(msg_string, " ")
 	//fmt.Println("error decoding line ", err)
 	fmt.Println(msg_array)
-	var msgTypes = StrSlice{"REQ"}
+	var msgTypes = StrSlice{"REQ", "BROAD"}
 
 	if len(msg_array) >= 2 {
 		if !msgTypes.Has(msg_array[0]) {

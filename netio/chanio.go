@@ -33,12 +33,12 @@ type Ntchan struct {
 	Reader_queue chan string
 	Writer_queue chan string
 	//inflow
-	REQ_in chan string
-	REP_in chan string
-	//BROAD_in     chan string
-	//BROAD_signal chan string
-	SEND_in  chan string
-	HEART_in chan string
+	REQ_in       chan string
+	REP_in       chan string
+	BROAD_in     chan string
+	BROAD_signal chan string
+	SEND_in      chan string
+	HEART_in     chan string
 	//outflow
 	REP_out chan string
 	REQ_out chan string
@@ -80,15 +80,15 @@ func logmsgc(ntchan Ntchan, name string, src string, msg string) {
 	vlog(ntchan, s)
 }
 
-//BROAD_signal chan string
-func ConnNtchan(conn net.Conn, SrcName string, DestName string, verbose bool) Ntchan {
+func ConnNtchan(conn net.Conn, SrcName string, DestName string, verbose bool, BROAD_signal chan string) Ntchan {
 	var ntchan Ntchan
 	ntchan.Reader_queue = make(chan string)
 	ntchan.Writer_queue = make(chan string)
 	ntchan.REQ_in = make(chan string)
 	ntchan.REP_in = make(chan string)
 	ntchan.REP_out = make(chan string)
-	//ntchan.BROAD_signal = BROAD_signal
+	ntchan.BROAD_in = make(chan string)
+	ntchan.BROAD_signal = BROAD_signal
 
 	ntchan.HEART_in = make(chan string)
 	ntchan.HEART_out = make(chan string)
@@ -146,14 +146,14 @@ func NetConnectorSetup(ntchan Ntchan) {
 
 	go RequestLoop(ntchan)
 
-	// go func() {
-	// 	for {
-	// 		msg := <-ntchan.BROAD_in
-	// 		fmt.Println("received %v", msg)
-	// 		ntchan.BROAD_signal <- msg
-	// 		//signal back to main
-	// 	}
-	// }()
+	go func() {
+		for {
+			msg := <-ntchan.BROAD_in
+			fmt.Println("received broadcast %s", msg)
+			ntchan.BROAD_signal <- msg
+			//signal back to main
+		}
+	}()
 
 	//TODO
 	//go WriteProducer(ntchan)
@@ -333,6 +333,9 @@ func ReadProcessor(ntchan Ntchan) {
 
 				case "REP":
 					ntchan.REP_in <- msgString
+
+				case "BROAD":
+					ntchan.BROAD_in <- msgString
 
 				}
 

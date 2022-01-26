@@ -45,6 +45,7 @@ type TCPNode struct {
 	Mgr           *chain.ChainManager
 	BROAD_out     chan string
 	BROAD_in      chan string
+	BROAD_signal  chan string
 	Starttime     time.Time
 	Logger        *log.Logger
 	Loglevel      int
@@ -124,8 +125,7 @@ func (t *TCPNode) HandleConnectTCP() {
 		// log.Println("# peers ", len(t.Peers))
 		t.log(fmt.Sprintf("setup channels"))
 		Verbose := true
-		//ntchan := netio.ConnNtchan(newpeerConn, "server", strRemoteAddr, Verbose, t.BROAD_in)
-		ntchan := netio.ConnNtchan(newpeerConn, "server", strRemoteAddr, Verbose)
+		ntchan := netio.ConnNtchan(newpeerConn, "server", strRemoteAddr, Verbose, t.BROAD_signal)
 
 		rand.Seed(time.Now().UnixNano())
 		ran := rand.Intn(100)
@@ -143,7 +143,7 @@ func (t *TCPNode) HandleConnectTCP() {
 
 //init an output connection
 //TODO check if connected inbound already
-func initOutbound(mainPeerAddress string, node_port int, verbose bool) netio.Ntchan {
+func initOutbound(mainPeerAddress string, node_port int, verbose bool, BROAD_signal chan string) netio.Ntchan {
 	fmt.Println("initOutbound")
 
 	addr := mainPeerAddress + ":" + strconv.Itoa(node_port)
@@ -155,7 +155,7 @@ func initOutbound(mainPeerAddress string, node_port int, verbose bool) netio.Ntc
 	}
 
 	//log.Println("connected")NetMsgRead
-	ntchan := netio.ConnNtchan(conn, "client", addr, verbose)
+	ntchan := netio.ConnNtchan(conn, "client", addr, verbose, BROAD_signal)
 
 	go netio.ReadLoop(ntchan)
 	go netio.ReadProcessor(ntchan)
@@ -200,7 +200,7 @@ func FetchAllBlocks(config config.Configuration, t *TCPNode) {
 
 	mainPeerAddress := config.PeerAddresses[0]
 	verbose := true
-	ntchan := initOutbound(mainPeerAddress, config.NodePort, verbose)
+	ntchan := initOutbound(mainPeerAddress, config.NodePort, verbose, t.BROAD_signal)
 	peer := netio.CreatePeer(mainPeerAddress, mainPeerAddress, config.NodePort, ntchan)
 	blocks := FetchBlocksPeer(config, peer)
 	//log.Println("got blocks ", len(blocks))
@@ -313,30 +313,48 @@ func runNode(t *TCPNode) {
 		//go chain.MakeBlockLoop(t.Mgr, blocktime)
 	}
 
-	go t.HandleConnectTCP()
-
-	go t.RunTCP()
-
 	//TESTING broadcast
 
 	//TODO setup global loops over all peers
 	//manager.pub_all <- "heart beat"
 	//chan BROAD_in = make(chan string)
 
-	t.BROAD_out = make(chan string)
+	// t.BROAD_out = make(chan string)
+	// //////
+	// fmt.Println("setup broad signal")
+	// t.BROAD_signal = make(chan string)
+	// t.BROAD_signal <- "TESTAETAWEGTAEW"
 
-	//broadcast message
-	go func() {
-		for {
-			msg := fmt.Sprintf("#peers %d", len(t.Peers))
-			t.BROAD_out <- msg
+	// go func() {
 
-			time.Sleep(5000 * time.Millisecond)
-		}
-	}()
+	// 	for {
+	// 		msg := <-t.BROAD_signal
+	// 		fmt.Println(">> signal received %s", msg)
+
+	// 	}
+	// }()
+
+	// t.BROAD_signal <- "TESTAETAWEGTAEW"
+
+	///////////
 
 	go t.broadcast()
+	go t.peersInfo()
 
+	go t.HandleConnectTCP()
+	go t.RunTCP()
+
+}
+
+func (t *TCPNode) peersInfo() {
+	//broadcast message
+
+	for {
+		msg := fmt.Sprintf("#peers %d", len(t.Peers))
+		t.BROAD_out <- msg
+
+		time.Sleep(5000 * time.Millisecond)
+	}
 }
 
 func (t *TCPNode) broadcast() {
