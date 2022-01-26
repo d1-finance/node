@@ -33,13 +33,17 @@ type Ntchan struct {
 	Reader_queue chan string
 	Writer_queue chan string
 	//inflow
-	REQ_in   chan string
-	REP_in   chan string
+	REQ_in chan string
+	REP_in chan string
+	//BROAD_in     chan string
+	//BROAD_signal chan string
 	SEND_in  chan string
 	HEART_in chan string
 	//outflow
-	REP_out   chan string
-	REQ_out   chan string
+	REP_out chan string
+	REQ_out chan string
+	//BROAD_out chan string
+
 	SEND_out  chan string
 	HEART_out chan string
 	//
@@ -76,6 +80,7 @@ func logmsgc(ntchan Ntchan, name string, src string, msg string) {
 	vlog(ntchan, s)
 }
 
+//BROAD_signal chan string
 func ConnNtchan(conn net.Conn, SrcName string, DestName string, verbose bool) Ntchan {
 	var ntchan Ntchan
 	ntchan.Reader_queue = make(chan string)
@@ -83,6 +88,7 @@ func ConnNtchan(conn net.Conn, SrcName string, DestName string, verbose bool) Nt
 	ntchan.REQ_in = make(chan string)
 	ntchan.REP_in = make(chan string)
 	ntchan.REP_out = make(chan string)
+	//ntchan.BROAD_signal = BROAD_signal
 
 	ntchan.HEART_in = make(chan string)
 	ntchan.HEART_out = make(chan string)
@@ -109,6 +115,7 @@ func ConnNtchanStub(name string) Ntchan {
 	ntchan.REP_out = make(chan string)
 	ntchan.REQ_out = make(chan string)
 	ntchan.PUB_out = make(chan string)
+	//ntchan.BROAD_in = make(chan string)
 	//ntchan.PUB_time_quit = make(chan int)
 	//ntchan.Reader_processed = 0
 	//ntchan.Writer_processed = 0
@@ -138,6 +145,15 @@ func NetConnectorSetup(ntchan Ntchan) {
 	//go HeartbeatPub(ntchan)
 
 	go RequestLoop(ntchan)
+
+	// go func() {
+	// 	for {
+	// 		msg := <-ntchan.BROAD_in
+	// 		fmt.Println("received %v", msg)
+	// 		ntchan.BROAD_signal <- msg
+	// 		//signal back to main
+	// 	}
+	// }()
 
 	//TODO
 	//go WriteProducer(ntchan)

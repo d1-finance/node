@@ -33,6 +33,7 @@ var logfile_name = "node.log"
 const LOGLEVEL_OFF = 0
 const LOGLEVEL_ON = 1
 
+//TODO rename
 type TCPNode struct {
 	NodePort      int
 	Name          string
@@ -42,6 +43,8 @@ type TCPNode struct {
 	ConnectedChan chan net.Conn //channel of newly connected clients/peers
 	Peers         []netio.Peer
 	Mgr           *chain.ChainManager
+	BROAD_out     chan string
+	BROAD_in      chan string
 	Starttime     time.Time
 	Logger        *log.Logger
 	Loglevel      int
@@ -121,6 +124,7 @@ func (t *TCPNode) HandleConnectTCP() {
 		// log.Println("# peers ", len(t.Peers))
 		t.log(fmt.Sprintf("setup channels"))
 		Verbose := true
+		//ntchan := netio.ConnNtchan(newpeerConn, "server", strRemoteAddr, Verbose, t.BROAD_in)
 		ntchan := netio.ConnNtchan(newpeerConn, "server", strRemoteAddr, Verbose)
 
 		rand.Seed(time.Now().UnixNano())
@@ -222,6 +226,8 @@ func (t *TCPNode) handleConnection(peer netio.Peer) {
 	//netio.NetConnectorSetup(peer.NTchan)
 	netio.NetConnectorSetup(peer.NTchan)
 
+	//how to publish to all?
+
 	//EXAMPLE
 	//publoop all
 	for i, peer := range t.Peers {
@@ -309,7 +315,41 @@ func runNode(t *TCPNode) {
 
 	go t.HandleConnectTCP()
 
-	t.RunTCP()
+	go t.RunTCP()
+
+	//TESTING broadcast
+
+	//TODO setup global loops over all peers
+	//manager.pub_all <- "heart beat"
+	//chan BROAD_in = make(chan string)
+
+	t.BROAD_out = make(chan string)
+
+	//broadcast message
+	go func() {
+		for {
+			msg := fmt.Sprintf("#peers %d", len(t.Peers))
+			t.BROAD_out <- msg
+
+			time.Sleep(5000 * time.Millisecond)
+		}
+	}()
+
+	go t.broadcast()
+
+}
+
+func (t *TCPNode) broadcast() {
+	//rebroadcast from single channel to all peers
+	for {
+		msg := <-t.BROAD_out
+		for _, peer := range t.Peers {
+			peer.NTchan.Writer_queue <- msg
+		}
+
+		time.Sleep(100 * time.Millisecond)
+	}
+
 }
 
 //init sync or load of blocks
