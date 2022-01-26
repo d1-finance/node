@@ -2,6 +2,7 @@ package netio
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 )
@@ -156,7 +157,7 @@ func (list StrSlice) Has(a string) bool {
 	return false
 }
 
-func ParseLine(msg_string string) Message {
+func ParseLine(msg_string string) (Message, error) {
 	var msgu Message
 	msg_array := strings.Split(msg_string, " ")
 	//fmt.Println("error decoding line ", err)
@@ -166,10 +167,15 @@ func ParseLine(msg_string string) Message {
 	if len(msg_array) >= 2 {
 		if !msgTypes.Has(msg_array[0]) {
 			fmt.Println("unsupported msg type")
+			return msgu, errors.New("unsupported msg type")
 		}
 
 		msgu.MessageType = msg_array[0]
 		msgu.Command = msg_array[1]
+	} else {
+		fmt.Println("parse error")
+		return msgu, errors.New("parse error")
 	}
-	return msgu
+	return msgu, nil
+
 }

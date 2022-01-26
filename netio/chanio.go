@@ -24,6 +24,8 @@ import (
 type Ntchan struct {
 	//TODO is only single connection
 	Conn net.Conn
+	//flag for if the peer has done a handshake
+	registered bool
 	//Name     string
 	SrcName  string //TODO doc
 	DestName string
@@ -168,7 +170,7 @@ func RequestReply(ntchan Ntchan, msgString string) string {
 
 	var reply_msg string
 	//var reply_msg netio.Message
-	msg := ParseLine(msgString)
+	msg, _ := ParseLine(msgString)
 
 	fmt.Sprintf("Handle cmd %v", msg.Command)
 
@@ -186,6 +188,7 @@ func RequestReply(ntchan Ntchan, msgString string) string {
 		reply_msg := dt.String()
 		return reply_msg
 
+	//handshake
 	case CMD_REGISTERPEER:
 		reply_msg := "todo"
 		return reply_msg
@@ -303,19 +306,27 @@ func ReadProcessor(ntchan Ntchan) {
 			logmsgc(ntchan, ntchan.SrcName, "ReadProcessor", msgString) //, ntchan.Reader_processed)
 
 			//msg := FromJSON(msgString)
-			msg := ParseLine(msgString)
-			logmsgc(ntchan, ntchan.SrcName, "ReadProcessor Msg", msg.MessageType)
+			msg, err := ParseLine(msgString)
 
-			switch msg.MessageType {
-			case "REQ":
-				ntchan.REQ_in <- msgString
+			if err == nil {
+				logmsgc(ntchan, ntchan.SrcName, "ReadProcessor Msg", msg.MessageType)
 
-			case "REP":
-				ntchan.REP_in <- msgString
+				switch msg.MessageType {
+				case "REQ":
+					ntchan.REQ_in <- msgString
+
+				case "REP":
+					ntchan.REP_in <- msgString
+
+				}
+
+				//handle unknown command
+				reply := "echo >>> " + msgString
+				ntchan.Writer_queue <- reply
+			} else {
+				reply := "error parsing >>> " + msgString
+				ntchan.Writer_queue <- reply
 			}
-
-			// reply := "echo >>> " + msgString
-			// ntchan.Reader_queue <- reply
 
 		}
 	}

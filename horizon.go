@@ -9,10 +9,14 @@ import (
 	"log"
 	"math/rand"
 	"net"
+	"net/http"
 	"os"
 	"os/signal"
 	"strconv"
+	"strings"
 	"time"
+
+	"github.com/gorilla/websocket"
 
 	"github.com/polygonledger/edn"
 
@@ -126,7 +130,7 @@ func (t *TCPNode) HandleConnectTCP() {
 		t.log(fmt.Sprintf("new peer %v : %v", p.Name, p))
 		t.Peers = append(t.Peers, p)
 
-		go t.handleConnection(t.Mgr, p)
+		go t.handleConnection(p)
 
 		//conn.Close()
 
@@ -206,14 +210,29 @@ func FetchAllBlocks(config config.Configuration, t *TCPNode) {
 }
 
 //func (t *TCPNode) handleConnection(mgr *chain.ChainManager, ntchan netio.Ntchan) {
-func (t *TCPNode) handleConnection(mgr *chain.ChainManager, peer netio.Peer) {
+//func (t *TCPNode) handleConnection(mgr *chain.ChainManager, peer netio.Peer) {
+func (t *TCPNode) handleConnection(peer netio.Peer) {
 	//tr := 100 * time.Millisecond
 	//defer ntchan.Conn.Close()
 	t.log(fmt.Sprintf("handleConnection"))
 
+	t.log(fmt.Sprintf("number of peers %v", len(t.Peers)))
+
 	//netio.NetConnectorSetup(ntchan)
 	//netio.NetConnectorSetup(peer.NTchan)
 	netio.NetConnectorSetup(peer.NTchan)
+
+	//EXAMPLE
+	//publoop all
+	for i, peer := range t.Peers {
+		//peer.NTchan.Writer_queue <- "new peer connected"
+		fmt.Println(i)
+		//fmt.Println("peer ", reflect.TypeOf(peer))
+		msg := fmt.Sprintf("new peer connected. total peers %v", len(t.Peers))
+		peer.NTchan.Writer_queue <- msg
+	}
+
+	//add to list of peers?
 
 	// go RequestHandlerTel(t, peer)
 
@@ -366,6 +385,9 @@ func runAll(config config.Configuration) {
 
 	go runNode(node)
 
+	//breaks
+	//go runHTTPServer()
+
 	//log.Println("run web")
 	//go runWeb(node)
 
@@ -423,6 +445,103 @@ func runNodeWithConfig() {
 
 	//handle shutdown should never happen, need restart on OS level and error handling
 
+}
+
+func homePage(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "<h1>Horizon ledger</h1>")
+}
+
+func wsEndpoint(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Websockets")
+}
+
+func setupRoutes() {
+	http.HandleFunc("/", homePage)
+	http.HandleFunc("/ws", wsEndpoint)
+}
+
+// func main() {
+// 	fmt.Println("start webserver")
+// 	setupRoutes()
+// 	log.Fatal(http.ListenAndServe(":8080", nil))
+// }
+
+var upgrader = websocket.Upgrader{}
+var todoList []string
+
+func getCmd(input string) string {
+	inputArr := strings.Split(input, " ")
+	return inputArr[0]
+}
+
+func getMessage(input string) string {
+	inputArr := strings.Split(input, " ")
+	var result string
+	for i := 1; i < len(inputArr); i++ {
+		result += inputArr[i]
+	}
+	return result
+}
+
+func updateTodoList(input string) {
+	tmpList := todoList
+	todoList = []string{}
+	for _, val := range tmpList {
+		if val == input {
+			continue
+		}
+		todoList = append(todoList, val)
+	}
+}
+
+func runHTTPServer() {
+
+	http.HandleFunc("/todo", func(w http.ResponseWriter, r *http.Request) {
+		// Upgrade upgrades the HTTP server connection to the WebSocket protocol.
+		conn, err := upgrader.Upgrade(w, r, nil)
+		if err != nil {
+			log.Print("upgrade failed: ", err)
+			return
+		}
+		defer conn.Close()
+
+		// Continuosly read and write message
+		for {
+			mt, message, err := conn.ReadMessage()
+			if err != nil {
+				log.Println("read failed:", err)
+				break
+			}
+			input := string(message)
+			//cmd := getCmd(input)
+			//msg := getMessage(input)
+			msg := input
+			todoList = append(todoList, msg)
+			// if cmd == "add" {
+			// 	todoList = append(todoList, msg)
+			// }
+			// else if cmd == "done" {
+			// 	updateTodoList(msg)
+			// }
+			output := "Current Log: \n"
+			for _, todo := range todoList {
+				output += "\n - " + todo + "\n"
+			}
+			output += "\n----------------------------------------"
+			message = []byte(output)
+			err = conn.WriteMessage(mt, message)
+			if err != nil {
+				log.Println("write failed:", err)
+				break
+			}
+		}
+	})
+
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "websockets.html")
+	})
+
+	http.ListenAndServe(":8080", nil)
 }
 
 func main() {
