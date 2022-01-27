@@ -317,28 +317,25 @@ func runNode(t *TCPNode) {
 
 	//TODO setup global loops over all peers
 	//manager.pub_all <- "heart beat"
-	//chan BROAD_in = make(chan string)
+	t.BROAD_signal = make(chan string)
 
-	// t.BROAD_out = make(chan string)
-	// //////
-	// fmt.Println("setup broad signal")
-	// t.BROAD_signal = make(chan string)
-	// t.BROAD_signal <- "TESTAETAWEGTAEW"
+	//TODO broadcast except to source
+	go func() {
+		for {
+			msg := <-t.BROAD_signal
+			fmt.Printf(">> signal received %s\n", msg)
+			//t.BROAD_out <- msg
 
-	// go func() {
+			for _, peer := range t.Peers {
+				peer.NTchan.Writer_queue <- msg
+			}
 
-	// 	for {
-	// 		msg := <-t.BROAD_signal
-	// 		fmt.Println(">> signal received %s", msg)
-
-	// 	}
-	// }()
-
-	// t.BROAD_signal <- "TESTAETAWEGTAEW"
+		}
+	}()
 
 	///////////
 
-	go t.broadcast()
+	//go t.broadcast()
 	go t.peersInfo()
 
 	go t.HandleConnectTCP()
@@ -350,23 +347,43 @@ func (t *TCPNode) peersInfo() {
 	//broadcast message
 
 	for {
-		msg := fmt.Sprintf("#peers %d", len(t.Peers))
-		t.BROAD_out <- msg
+		//msg := fmt.Sprintf("#peers %d", len(t.Peers))
+		//t.BROAD_out <- msg
 
 		time.Sleep(5000 * time.Millisecond)
 	}
 }
 
 func (t *TCPNode) broadcast() {
-	//rebroadcast from single channel to all peers
-	for {
-		msg := <-t.BROAD_out
-		for _, peer := range t.Peers {
-			peer.NTchan.Writer_queue <- msg
+	go func() {
+		fmt.Println("test......")
+		for {
+			fmt.Println("test2")
+			t.BROAD_out <- "test"
+			time.Sleep(500 * time.Millisecond)
 		}
+	}()
 
-		time.Sleep(100 * time.Millisecond)
-	}
+	//Peers is empty
+
+	//rebroadcast from single channel to all peers
+	go func() {
+		for {
+			msg := <-t.BROAD_out
+			//msg := "test"
+			fmt.Println("broadcast %v", msg)
+			// for _, peer := range t.Peers {
+			// 	peer.NTchan.Writer_queue <- msg
+			// }
+
+			// time.Sleep(500 * time.Millisecond)
+		}
+	}()
+
+	// for {
+	// 	t.BROAD_out <- "test"
+	// 	time.Sleep(500 * time.Millisecond)
+	// }
 
 }
 

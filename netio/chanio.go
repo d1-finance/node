@@ -149,9 +149,16 @@ func NetConnectorSetup(ntchan Ntchan) {
 	go func() {
 		for {
 			msg := <-ntchan.BROAD_in
-			fmt.Println("received broadcast %s", msg)
+			fmt.Printf("received broadcast %s\n", msg)
 			ntchan.BROAD_signal <- msg
 			//signal back to main
+		}
+	}()
+
+	go func() {
+		for {
+			ntchan.BROAD_signal <- fmt.Sprintf("test %v", ntchan.SrcName)
+			time.Sleep(5000 * time.Millisecond)
 		}
 	}()
 
@@ -175,6 +182,13 @@ func NetConnectorSetupEcho(ntchan Ntchan) {
 	go ReadProcessorEcho(ntchan)
 	//write to network whatever is in writer queue
 	go WriteLoop(ntchan, 300*time.Millisecond)
+
+	go func() {
+		for {
+			msg := <-ntchan.BROAD_in
+			ntchan.BROAD_signal <- msg
+		}
+	}()
 
 	//TODO
 	//go WriteProducer(ntchan)
