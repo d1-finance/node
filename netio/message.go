@@ -37,6 +37,7 @@ const (
 //TODO define "namespace/grammar/protocol file"
 const (
 	CMD_REGISTERPEER   = "REGISTERPEER"
+	CMD_REGISTERALIAS  = "REGISTERALIAS"
 	CMD_GETPEERS       = "GETPEERS"
 	CMD_TIME           = "TIME"
 	CMD_ACCOUNTS       = "ACCOUNTS"

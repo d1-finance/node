@@ -125,7 +125,9 @@ func (t *TCPNode) HandleConnectTCP() {
 		// log.Println("# peers ", len(t.Peers))
 		t.log(fmt.Sprintf("setup channels"))
 		Verbose := true
-		ntchan := netio.ConnNtchan(newpeerConn, "server", strRemoteAddr, Verbose, t.BROAD_signal)
+		srcName := "localNode"
+		destName := strRemoteAddr
+		ntchan := netio.ConnNtchan(newpeerConn, srcName, destName, Verbose, t.BROAD_signal)
 
 		rand.Seed(time.Now().UnixNano())
 		ran := rand.Intn(100)

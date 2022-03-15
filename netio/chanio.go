@@ -17,6 +17,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand"
 	"net"
 	"time"
 )
@@ -29,6 +30,7 @@ type Ntchan struct {
 	//Name     string
 	SrcName  string //TODO doc
 	DestName string
+	Alias    string
 	//TODO message type
 	Reader_queue chan string
 	Writer_queue chan string
@@ -80,6 +82,11 @@ func logmsgc(ntchan Ntchan, name string, src string, msg string) {
 	vlog(ntchan, s)
 }
 
+func logmsge(ntchan Ntchan, name string, src string, dest string, msg string) {
+	s := fmt.Sprintf("%s [%s] [%s] ### %v", name, src, dest, msg)
+	vlog(ntchan, s)
+}
+
 func ConnNtchan(conn net.Conn, SrcName string, DestName string, verbose bool, BROAD_signal chan string) Ntchan {
 	var ntchan Ntchan
 	ntchan.Reader_queue = make(chan string)
@@ -101,6 +108,8 @@ func ConnNtchan(conn net.Conn, SrcName string, DestName string, verbose bool, BR
 	ntchan.Conn = conn
 	ntchan.SrcName = SrcName
 	ntchan.DestName = DestName
+
+	ntchan.Alias = fmt.Sprintf("peer-%v", rand.Intn(1000))
 
 	return ntchan
 }
@@ -149,18 +158,18 @@ func NetConnectorSetup(ntchan Ntchan) {
 	go func() {
 		for {
 			msg := <-ntchan.BROAD_in
-			fmt.Printf("received broadcast %s\n", msg)
+			fmt.Printf("received broadcast %s %s\n", msg, ntchan.Alias)
 			ntchan.BROAD_signal <- msg
 			//signal back to main
 		}
 	}()
 
-	go func() {
-		for {
-			ntchan.BROAD_signal <- fmt.Sprintf("test %v", ntchan.SrcName)
-			time.Sleep(5000 * time.Millisecond)
-		}
-	}()
+	// go func() {
+	// 	for {
+	// 		ntchan.BROAD_signal <- fmt.Sprintf("test %v", ntchan.SrcName)
+	// 		time.Sleep(5000 * time.Millisecond)
+	// 	}
+	// }()
 
 	//TODO
 	//go WriteProducer(ntchan)
@@ -216,6 +225,12 @@ func RequestReply(ntchan Ntchan, msgString string) string {
 	case CMD_TIME:
 		dt := time.Now()
 		reply_msg := dt.String()
+		return reply_msg
+
+	case CMD_REGISTERALIAS:
+		//TODO only pointer is set
+		ntchan.Alias = "123"
+		reply_msg := fmt.Sprint("new alias %v", ntchan.Alias)
 		return reply_msg
 
 	//handshake
@@ -333,7 +348,8 @@ func ReadProcessor(ntchan Ntchan) {
 		logmsgd(ntchan, "ReadProcessor", msgString)
 
 		if len(msgString) > 0 {
-			logmsgc(ntchan, ntchan.SrcName, "ReadProcessor", msgString) //, ntchan.Reader_processed)
+			//logmsge(ntchan, ntchan.SrcName, ntchan.DestName, "ReadProcessor", msgString) //, ntchan.Reader_processed)
+			logmsge(ntchan, ntchan.Alias, ntchan.DestName, "ReadProcessor", msgString) //, ntchan.Reader_processed)
 
 			//msg := FromJSON(msgString)
 			msg, err := ParseLine(msgString)
@@ -357,7 +373,7 @@ func ReadProcessor(ntchan Ntchan) {
 				reply := "echo >>> " + msgString
 				ntchan.Writer_queue <- reply
 			} else {
-				reply := "error parsing >>> " + msgString
+				reply := "error parsing >>> " + msgString + " (" + ntchan.DestName + ")"
 				ntchan.Writer_queue <- reply
 			}
 
