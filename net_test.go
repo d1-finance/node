@@ -120,12 +120,15 @@ func TestServer_Write(t *testing.T) {
 
 	time.Sleep(100 * time.Millisecond)
 
-	//log.Println(clientNt.SrcName)
-	//TODO! breaks
-	// rmsg := <-clientNt.Reader_queue
-	// if rmsg != reqs {
-	// 	t.Error("different message on reader ", rmsg)
-	// }
+	rmsg1 := <-clientNt.Reader_queue
+	if rmsg1 != "new peer connected. total peers 1" {
+		t.Error("different message on reader ", rmsg1)
+	}
+
+	rmsg := <-clientNt.Reader_queue
+	if rmsg != reqs {
+		t.Error("different message on reader ", rmsg)
+	}
 	// if isEmpty(clientNt.Reader_queue, 1*time.Second) {
 	// 	t.Error("fail")
 	//}
