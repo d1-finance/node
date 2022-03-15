@@ -63,7 +63,7 @@ func (t *TCPNode) HandleConnectTCPMock() {
 		// log.Println("> ", t.Peers)
 		// log.Println("# peers ", len(t.Peers))
 		Verbose := true
-		ntchan := netio.ConnNtchan(newpeerConn, "server", strRemoteAddr, Verbose)
+		ntchan := netio.ConnNtchan(newpeerConn, "server", strRemoteAddr, Verbose, make(chan string))
 
 		p := netio.Peer{Address: strRemoteAddr, NodePort: t.NodePort, NTchan: ntchan}
 		t.Peers = append(t.Peers, p)

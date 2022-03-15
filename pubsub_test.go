@@ -41,7 +41,7 @@ func testclientpub() netio.Ntchan {
 	}
 	//t.Error("...")
 	log.Println("connected")
-	ntchan := netio.ConnNtchan(conn, "client", addr, true)
+	ntchan := netio.ConnNtchan(conn, "client", addr, true, make(chan string))
 	//defer conn.Close()
 	return ntchan
 

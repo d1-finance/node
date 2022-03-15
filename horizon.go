@@ -373,7 +373,7 @@ func (t *TCPNode) broadcast() {
 		for {
 			msg := <-t.BROAD_out
 			//msg := "test"
-			fmt.Println("broadcast %v", msg)
+			fmt.Println("broadcast ", msg)
 			// for _, peer := range t.Peers {
 			// 	peer.NTchan.Writer_queue <- msg
 			// }
