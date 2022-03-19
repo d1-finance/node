@@ -54,8 +54,6 @@ func testclient() netio.Ntchan {
 }
 
 func TestServer_Run(t *testing.T) {
-	//log.Println("TestServer_Run")
-
 	testsrv := initserver()
 	defer testsrv.Close()
 
@@ -83,14 +81,12 @@ func TestServer_Run(t *testing.T) {
 }
 
 func TestServer_Write(t *testing.T) {
-	//log.Println("TestServer_Write")
 
 	testsrv := initserver()
 	defer testsrv.Close()
 
 	clientNt := testclient()
 	go netio.ReadLoop(clientNt)
-	//go netio.ReadProcessor(clientNt)
 
 	time.Sleep(2000 * time.Millisecond)
 
@@ -134,6 +130,58 @@ func TestServer_Write(t *testing.T) {
 	//}
 
 }
+
+// func TestServer_WriteProcess(t *testing.T) {
+
+// 	testsrv := initserver()
+// 	defer testsrv.Close()
+
+// 	clientNt := testclient()
+// 	go netio.ReadLoop(clientNt)
+// 	go netio.ReadProcessor(clientNt)
+
+// 	time.Sleep(2000 * time.Millisecond)
+
+// 	peers := testsrv.GetPeers()
+// 	if len(peers) != 1 {
+// 		t.Error("no peers ", testsrv.Peers, len(peers))
+// 	}
+
+// 	firstpeer := peers[0]
+
+// 	if !xutils.IsEmpty(firstpeer.NTchan.Writer_queue, 1*time.Second) {
+// 		t.Error("fail")
+// 	}
+
+// 	reqs := "REQ PING"
+// 	n, err := netio.NetWrite(firstpeer.NTchan, reqs)
+
+// 	if err != nil {
+// 		t.Error("could not write to server:", err)
+// 	}
+
+// 	delimsize := 1
+// 	l := len([]byte(reqs)) + delimsize
+// 	if n != l {
+// 		t.Error("wrong bytes written ", l)
+// 	}
+
+// 	time.Sleep(100 * time.Millisecond)
+
+// 	rmsg1 := <-clientNt.Reader_queue
+// 	if rmsg1 != "new peer connected. total peers 1" {
+// 		t.Error("different message on reader ", rmsg1)
+// 	}
+
+// 	rmsg := <-clientNt.Reader_queue
+// 	if rmsg != "pong" {
+// 		t.Error("different message on reader ", rmsg)
+// 	}
+// 	// if isEmpty(clientNt.Reader_queue, 1*time.Second) {
+// 	// 	t.Error("fail")
+// 	//}
+
+// }
 
 func TestServer_Process(t *testing.T) {
 

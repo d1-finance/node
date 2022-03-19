@@ -732,7 +732,7 @@ func testclient_subscribe() {
 }
 
 //run client based on cmds
-func main() {
+func mainOld() {
 
 	//kp := ReadKeys(keysfile)
 	//fmt.Println("=> ", kp)
@@ -756,6 +756,31 @@ func main() {
 
 	case "listen":
 		runListenMode(cmd, config)
+
+	default:
+		log.Println("unknown cmd")
+	}
+
+}
+
+func main() {
+
+	//kp := ReadKeys(keysfile)
+	//fmt.Println("=> ", kp)
+
+	config := getConfig()
+
+	cmd := readFlags()
+
+	//dnslook()
+
+	switch cmd {
+
+	case "test", "ping":
+		runSingleMode(cmd, config)
+
+	// case "listen":
+	// 	runListenMode(cmd, config)
 
 	default:
 		log.Println("unknown cmd")

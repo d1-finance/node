@@ -1,0 +1,4 @@
+* client example
+* read connect to which ip/port
+* exit signal by peer for telnet
+* p2p heartbeat

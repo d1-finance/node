@@ -335,6 +335,14 @@ func runNode(t *TCPNode) {
 		}
 	}()
 
+	go func() {
+		for {
+			dt := time.Now()
+			t.BROAD_signal <- dt.String()
+			time.Sleep(5000 * time.Millisecond)
+		}
+	}()
+
 	///////////
 
 	//go t.broadcast()
@@ -342,6 +350,8 @@ func runNode(t *TCPNode) {
 
 	go t.HandleConnectTCP()
 	go t.RunTCP()
+
+	//TODO connect peers
 
 }
 
