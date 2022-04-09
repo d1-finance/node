@@ -335,10 +335,11 @@ func runNode(t *TCPNode) {
 		}
 	}()
 
+	//HEARTBEAT
 	go func() {
 		for {
 			dt := time.Now()
-			t.BROAD_signal <- dt.String()
+			t.BROAD_signal <- fmt.Sprintf("heartbeat %v", dt.String())
 			time.Sleep(5000 * time.Millisecond)
 		}
 	}()
